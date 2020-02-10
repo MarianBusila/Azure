@@ -21,6 +21,7 @@ namespace AppMetricsAppInsights
         private static Task[] backgroundTasks;
         private static int RecordCount;
         private static int FlushCount;
+        private static readonly ThreadLocal<Random> Rnd = new ThreadLocal<Random>(() => new Random(Environment.TickCount));
 
 
         static void Main(string[] args)
@@ -132,11 +133,22 @@ namespace AppMetricsAppInsights
                 sw.Restart();
 
                 metrics.Measure.Counter.Increment(SampleMetrics.CounterOne);
+                metrics.Measure.Counter.Increment(SampleMetrics.CounterTwo, Rnd.Value.Next(1, 4));
+                metrics.Measure.Gauge.SetValue(SampleMetrics.GaugeOne, Rnd.Value.Next(0, 201));
+                metrics.Measure.Histogram.Update(SampleMetrics.HistogramOne, Rnd.Value.Next(0, 201));
+                var dimension1 = Rnd.Value.Next(0, 2) == 0 ? "failures" : "errors";
+                metrics.Measure.Meter.Mark(SampleMetrics.MeterOne, Rnd.Value.Next(0, 6), dimension1);
 
                 try
                 {
+                    using (metrics.Measure.Timer.Time(SampleMetrics.TimerOne))
+                    {
+                        await Task.Delay(Rnd.Value.Next(0, 101), ct).ConfigureAwait(false);
+                    }
+
                     Console.Write('.');
                     Interlocked.Increment(ref RecordCount);
+                    
 
                     sw.Stop();
                     var remaining = every - sw.Elapsed;
