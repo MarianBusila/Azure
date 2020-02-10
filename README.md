@@ -1,0 +1,2 @@
+# Proof Of concepts related to Azure
+- **AppMetricsAppInsights** - a proof of concept using [App.Metrics](https://github.com/AppMetrics/AppMetrics) with [Application Insights reporter](https://github.com/jdvor/appmetrics-applicationinsights)
